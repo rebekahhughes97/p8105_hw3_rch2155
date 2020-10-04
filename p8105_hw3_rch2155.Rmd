@@ -4,67 +4,123 @@ author: Rebekah Hughes
 output: github_document
 ---
 
-The code chunk below loads all of the packages used in this homework.
+The code chunk below loads the tidyverse package and sets up the overall structure of plots that will be used in this homework.
 
 ```{r}
 library(tidyverse)
 
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ## Problem 1
 
-
+The following code loads the instacart dataset for this problem, without including it in the local data directory.
 
 ```{r}
+library(p8105.datasets)
+data("instacart")
+```
 
+The instacrt dataset includes data regarding items ordered from a sample of instacart users in 2017. There are `r ncol(instacart)` variables and `r nrow(instacart)` observations in the dataset. The data is a data frame with a mixture of character and numeric variables. Some key variables to note are the product names, number of times products were reordered, the aisle the items were ordered from and when the items were ordered during the day. The average number of times items were reordered was `r mean(instacart$reordered)` and the average time of day that items were ordered during was during hour `r mean(instacart$order_hour_of_day)`.
+
+The following code chunk determines the number of aisles and aisle with most items ordered from.
+
+```{r}
+instacart %>% 
+  distinct(aisle) %>% 
+  count()
+
+insta_aisle_df =
+  instacart %>%
+  dist_aisle = mutate(distinct(aisle_id)) %>% 
+    mutate (aisle_rank = rank(desc(dist_aisle)))
 ```
 
 
 
 ```{r}
-
+  instacart %>% 
+    group_by(aisle_id) %>% 
+    filter(aisle_id >= n(10000))
 ```
 
 
 
-```{r}
 
+## Problem 2
+
+```{r}
+accel_df =
+  read_csv("./data/accel_data.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(weekend_or_weekday = if_else(day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), "weekday", "weekend")) %>% 
+  pivot_longer(
+    activity_1:activity_1440,
+    names_to = "minute",
+    names_prefix = "activity_",
+    values_to = "activity"
+  )
+```
+
+
+```{r}
+day_totals =
+  accel_df %>% 
+  mutate(total_activity = rowSums(select(., starts_with("activity_")))) %>% 
+  pivot_wider(
+    names_from = day,
+    values_from = total_activity
+  ) %>% 
+  knitr::kable(digits = 2)
+```
+
+
+```{r}
+accel_df %>% 
+  ggplot(aes(x = minute, y = activity, color = day)) +
+  geom_point(position = "dodge")
 ```
 
 
 
-```{r}
+## Problem 3
 
+```{r}
+library(p8105.datasets)
+data("ny_noaa")
 ```
 
 
-
 ```{r}
-
+weather_df =
+  ny_noaa %>% 
+  mutate(date = as.character(date)) %>% 
+  separate(date, c("year", "month", "day")) %>% 
+  mutate(prcp = prcp*10) %>% 
+  mutate(tmax = tmax*10) %>% 
+  mutate(tmin = tmin*10)
 ```
 
 
-
 ```{r}
-
-```
-
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
+weather_df %>% 
+  distinct(id) %>% 
+  filter(month == c("1", "7")) %>% 
+  
 ```
 
 
