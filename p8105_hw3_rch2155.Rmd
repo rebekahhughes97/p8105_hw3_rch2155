@@ -44,18 +44,13 @@ instacart %>%
   distinct(aisle) %>% 
   count()
 
-insta_aisle_df =
-  instacart %>%
-  dist_aisle = mutate(distinct(aisle_id)) %>% 
-    mutate (aisle_rank = rank(desc(dist_aisle)))
+
 ```
 
 
 
 ```{r}
-  instacart %>% 
-    group_by(aisle_id) %>% 
-    filter(aisle_id >= n(10000))
+ 
 ```
 
 
@@ -69,18 +64,19 @@ accel_df =
   janitor::clean_names() %>% 
   mutate(weekend_or_weekday = if_else(day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), "weekday", "weekend")) %>% 
   pivot_longer(
-    activity_1:activity_1440,
-    names_to = "minute",
-    names_prefix = "activity_",
-    values_to = "activity"
-  )
+  activity_1:activity_1440,
+  names_to = "minute",
+  names_prefix = "activity_",
+  values_to = "activity"
+)
 ```
 
 
 ```{r}
 day_totals =
   accel_df %>% 
-  mutate(total_activity = rowSums(select(., starts_with("activity_")))) %>% 
+  group_by(day_id, day) %>% 
+  summarize(total_activity = sum(activity)) %>% 
   pivot_wider(
     names_from = day,
     values_from = total_activity
@@ -90,7 +86,7 @@ day_totals =
 
 
 ```{r}
-accel_df %>% 
+accel_df %>%
   ggplot(aes(x = minute, y = activity, color = day)) +
   geom_point(position = "dodge")
 ```
@@ -110,22 +106,33 @@ weather_df =
   ny_noaa %>% 
   mutate(date = as.character(date)) %>% 
   separate(date, c("year", "month", "day")) %>% 
-  mutate(prcp = prcp*10) %>% 
-  mutate(tmax = tmax*10) %>% 
-  mutate(tmin = tmin*10)
+  mutate(prcp = prcp/10) %>% 
+  mutate(tmax = as.numeric(tmax), tmin = as.numeric(tmin)) %>% 
+  mutate(tmax = tmax/10) %>% 
+  mutate(tmin = tmin/10)
 ```
 
 
 ```{r}
 weather_df %>% 
   distinct(id) %>% 
-  filter(month == c("1", "7")) %>% 
+  filter(month == c('1', '7')) %>% 
+  summarize(mean_tmax = mean(tmax)) %>% 
+  ggplot(aes(x = year, y = mean_tmax, fill = month)) +
+  geom_point() +
+  facet_grid(. ~ month)
   
 ```
 
 
 
 ```{r}
+tmax_tmin_plot =
+  weather_df %>% 
+  ggplot(aes(x = tmax, y = tmin))+
+  
+  
+  
 
 ```
 
