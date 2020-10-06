@@ -8,6 +8,7 @@ The code chunk below loads the tidyverse package and sets up the overall structu
 
 ```{r}
 library(tidyverse)
+library(patchwork)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -73,22 +74,21 @@ accel_df =
 
 
 ```{r}
-day_totals =
-  accel_df %>% 
+accel_df %>% 
   group_by(day_id, day) %>% 
   summarize(total_activity = sum(activity)) %>% 
   pivot_wider(
     names_from = day,
     values_from = total_activity
-  ) %>% 
-  knitr::kable(digits = 2)
+  ) %>%
+  knitr::kable(digits = 1)
 ```
 
 
 ```{r}
 accel_df %>%
   ggplot(aes(x = minute, y = activity, color = day)) +
-  geom_point(position = "dodge")
+  geom_point()
 ```
 
 
@@ -114,11 +114,11 @@ weather_df =
 
 
 ```{r}
-weather_df %>% 
-  distinct(id) %>% 
-  filter(month == c('1', '7')) %>% 
-  summarize(mean_tmax = mean(tmax)) %>% 
-  ggplot(aes(x = year, y = mean_tmax, fill = month)) +
+weather_df %>%
+  filter(month == c("1", "7")) %>% 
+  group_by(id, year, month) %>%
+  summarise(mean_tmax = mean(tmax)) %>% 
+  ggplot(aes(x = year, y = mean_tmax, fill = id)) +
   geom_point() +
   facet_grid(. ~ month)
   
@@ -129,58 +129,16 @@ weather_df %>%
 ```{r}
 tmax_tmin_plot =
   weather_df %>% 
-  ggplot(aes(x = tmax, y = tmin))+
+  ggplot(aes(x = tmax, y = tmin)) +
+  geom_density2d()
   
-  
-  
+snow_plot =
+  weather_df %>% 
+  group_by(year, month, day) %>% 
+  filter(between(snow, 1, 99)) %>% 
+  ggplot(aes(x = year, y = snow)) +
+  geom_boxplot()
 
-```
-
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
-```
-
-
-
-```{r}
-
+tmax_tmin_plot / snow_plot
 ```
 
