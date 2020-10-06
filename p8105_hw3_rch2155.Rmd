@@ -6,7 +6,7 @@ output: github_document
 
 The code chunk below loads the tidyverse package and sets up the overall structure of plots that will be used in this homework.
 
-```{r}
+```{r setup, include=FALSE}
 library(tidyverse)
 library(p8105.datasets)
 library(patchwork)
@@ -95,19 +95,22 @@ instacart %>%
 accel_df =
   read_csv("./data/accel_data.csv") %>% 
   janitor::clean_names() %>% 
-  mutate(weekend_or_weekday = if_else(day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), "weekday", "weekend")) %>% 
+  mutate(weekend_or_weekday = if_else(day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), "weekday", "weekend"),
+         day = factor(day),
+         day = fct_relevel(day, c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))) %>% 
   pivot_longer(
   activity_1:activity_1440,
   names_to = "minute",
   names_prefix = "activity_",
   values_to = "activity"
-)
+) %>% 
+  mutate(minute = as.numeric(minute))
 ```
 
 
 ```{r}
 accel_df %>% 
-  group_by(day_id, day) %>% 
+  group_by(day, day_id) %>% 
   summarize(total_activity = sum(activity)) %>% 
   pivot_wider(
     names_from = day,
@@ -120,7 +123,7 @@ accel_df %>%
 ```{r}
 accel_df %>%
   ggplot(aes(x = minute, y = activity, color = day)) +
-  geom_point()
+  geom_smooth()
 ```
 
 
@@ -128,32 +131,35 @@ accel_df %>%
 ## Problem 3
 
 ```{r}
-library(p8105.datasets)
 data("ny_noaa")
 ```
 
 
 ```{r}
 weather_df =
-  ny_noaa %>% 
+  ny_noaa%>% 
   mutate(date = as.character(date)) %>% 
   separate(date, c("year", "month", "day")) %>% 
   mutate(prcp = prcp/10) %>% 
   mutate(tmax = as.numeric(tmax), tmin = as.numeric(tmin)) %>% 
   mutate(tmax = tmax/10) %>% 
-  mutate(tmin = tmin/10)
+  mutate(tmin = tmin/10) %>% 
+  mutate(month = as.numeric(month))
+
+weather_df %>% 
+  count(snow) %>% 
+  arrange(desc(n))
 ```
 
 
 ```{r}
 weather_df %>%
-  filter(month == c("1", "7")) %>% 
   group_by(id, year, month) %>%
   summarise(mean_tmax = mean(tmax)) %>% 
+  filter(month %in% c('1', '7')) %>% 
   ggplot(aes(x = year, y = mean_tmax, fill = id)) +
   geom_point() +
   facet_grid(. ~ month)
-  
 ```
 
 
@@ -162,15 +168,17 @@ weather_df %>%
 tmax_tmin_plot =
   weather_df %>% 
   ggplot(aes(x = tmax, y = tmin)) +
-  geom_density2d()
+  geom_bin2d() +
+  theme(legend.position = "right")
   
 snow_plot =
   weather_df %>% 
   group_by(year, month, day) %>% 
   filter(between(snow, 1, 99)) %>% 
   ggplot(aes(x = year, y = snow)) +
-  geom_boxplot()
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
-tmax_tmin_plot / snow_plot
+tmax_tmin_plot + snow_plot
 ```
 
