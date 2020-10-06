@@ -4,7 +4,6 @@ author: Rebekah Hughes
 output: github_document
 ---
 
-The code chunk below loads the tidyverse package and sets up the overall structure of plots that will be used in this homework.
 
 ```{r setup, include=FALSE}
 library(tidyverse)
@@ -30,17 +29,15 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ## Problem 1
 
-The following code loads the instacart dataset for this problem, without including it in the local data directory.
+The following code loads the instacart dataset for this problem.
 
 ```{r}
 data("instacart")
 ```
 
-The instacrt dataset includes data regarding items ordered from a sample of instacart users in 2017. There are `r ncol(instacart)` variables and `r nrow(instacart)` observations in the dataset. The data is a data frame with a mixture of character and numeric variables. Some key variables to note are the product names, number of times products were reordered, the aisle the items were ordered from and when the items were ordered during the day. The average number of times items were reordered was `r mean(instacart$reordered)` and the average time of day that items were ordered during was during hour `r mean(instacart$order_hour_of_day)`.
+The instacart dataset includes data regarding items ordered from a sample of instacart users in 2017. The observations are on the level of item ordered by the various users. There are `r ncol(instacart)` variables and `r nrow(instacart)` observations in the dataset. The data is a data frame with a mixture of character and numeric variables. The variables included contain information on the products ordered, the user, the time of day and week that the products were ordered, the aisle and the department the products were ordered from. Some noteworthy variables are the day of the week, the product, the aisle, and the time of day the products were ordered.
 
-Notes: observations on on level of items ordered by users, list out variables in dataset
-
-The following code chunk determines the number of aisles and aisle with most items ordered from.
+The following code chunk determines the number of aisles and aisles with the most items ordered from.
 
 ```{r}
 instacart %>%
@@ -48,7 +45,9 @@ instacart %>%
   arrange(desc(n))
 ```
 
+Using the above code chunk, it can be determined there are 134 aisles and the aisles with the most items ordered from them are fresh vegetables, fresh fruits, and packaged vegetables and fruits.
 
+The following code chunk makes a plot showing number of items ordered on each aisle.
 
 ```{r}
 instacart %>%
@@ -63,6 +62,9 @@ instacart %>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
+The plot starts out with the items ordered the least, such as butter and oils and vinegars and progresses to the items ordered the most, as noted from the previous code chunk.
+
+The following code shows the three most popular items ordered from the baking ingredients, dog food care, and packaged vegetables aisles.
 
 ```{r}
 instacart %>% 
@@ -75,6 +77,9 @@ instacart %>%
   knitr::kable()
 ```
 
+The results in the table show that light brown sugar, snakc sticks chicken and rice recipe dog treats, and organic baby spinach were the top selling items of each category.
+
+The following code chunk creates a table showing the average time of day that Pink Lady Apples and Coffee Ice Cream were ordered.
 
 ```{r}
 instacart %>% 
@@ -88,8 +93,12 @@ instacart %>%
   knitr::kable()
 ```
 
+According to the above table, it appears that Pink Lady Apples are ordered earlier in the day than Coffee Ice Cream for most days of the week.
+
 
 ## Problem 2
+
+The following code load, tidies and wrangles the accelerometer dataset.
 
 ```{r}
 accel_df =
@@ -107,6 +116,9 @@ accel_df =
   mutate(minute = as.numeric(minute))
 ```
 
+The accelerometer dataset contains data regarding the amount of activity for one person over a 24 hour period for 5 weeks. There are `r ncol(accel_df)` variables and `r nrow(accel_df)` observations in the dataset. Key variables to note are the activity and minute variables, the day variable, the week variable, and the weekday versus weekend variable.
+
+The next code chunk creates and displays a table with the total activity across a day.
 
 ```{r}
 accel_df %>% 
@@ -119,6 +131,9 @@ accel_df %>%
   knitr::kable(digits = 1)
 ```
 
+Using the above table, it can de determined that there was more activity during the first weeks of the recording and there was less activity on saturdays in general compared to other days of the week.
+
+The following code creates a plot showing the acitivty across a 24 hour period for each day.
 
 ```{r}
 accel_df %>%
@@ -126,6 +141,7 @@ accel_df %>%
   geom_smooth()
 ```
 
+Based on the graph, it can be determined that the person is in overall more active during the week compared to the weekend. There are also certain times of day that the person is more active including around minutes 500 and 1250. There is a big jump on Sunday around minute 650 and a jump on Friday around minute 1250.
 
 
 ## Problem 3
