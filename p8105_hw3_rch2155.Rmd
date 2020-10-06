@@ -8,6 +8,7 @@ The code chunk below loads the tidyverse package and sets up the overall structu
 
 ```{r}
 library(tidyverse)
+library(p8105.datasets)
 library(patchwork)
 
 knitr::opts_chunk$set(
@@ -32,29 +33,60 @@ scale_fill_discrete = scale_fill_viridis_d
 The following code loads the instacart dataset for this problem, without including it in the local data directory.
 
 ```{r}
-library(p8105.datasets)
 data("instacart")
 ```
 
 The instacrt dataset includes data regarding items ordered from a sample of instacart users in 2017. There are `r ncol(instacart)` variables and `r nrow(instacart)` observations in the dataset. The data is a data frame with a mixture of character and numeric variables. Some key variables to note are the product names, number of times products were reordered, the aisle the items were ordered from and when the items were ordered during the day. The average number of times items were reordered was `r mean(instacart$reordered)` and the average time of day that items were ordered during was during hour `r mean(instacart$order_hour_of_day)`.
 
+Notes: observations on on level of items ordered by users, list out variables in dataset
+
 The following code chunk determines the number of aisles and aisle with most items ordered from.
 
 ```{r}
-instacart %>% 
-  distinct(aisle) %>% 
-  count()
-
-
+instacart %>%
+  count(aisle) %>% 
+  arrange(desc(n))
 ```
 
 
 
 ```{r}
- 
+instacart %>%
+  count(aisle) %>% 
+  filter(n > 10000) %>% 
+  mutate(
+    aisle = factor(aisle),
+    aisle = fct_reorder(aisle, n)
+  ) %>% 
+  ggplot(aes(x = aisle, y = n)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
 
+```{r}
+instacart %>% 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+  group_by(aisle) %>% 
+  count(product_name) %>% 
+  mutate(rank = min_rank(desc(n))) %>% 
+  filter(rank < 4) %>% 
+  arrange(aisle, rank) %>% 
+  knitr::kable()
+```
+
+
+```{r}
+instacart %>% 
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
+  group_by(product_name, order_dow) %>% 
+  summarize(mean_hour = mean(order_hour_of_day)) %>% 
+  pivot_wider(
+    names_from = order_dow,
+    values_from = mean_hour
+  ) %>% 
+  knitr::kable()
+```
 
 
 ## Problem 2
