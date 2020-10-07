@@ -133,7 +133,7 @@ accel_df %>%
     names_from = day,
     values_from = total_activity
   ) %>%
-  knitr::kable(digits = 1)
+  knitr::kable()
 ```
 
 Using the above table, it can de determined that there was more activity during the first weeks of the recording and there was less activity on Saturdays in general compared to other days of the week.
@@ -144,10 +144,10 @@ The following code creates a plot showing the activity across a 24 hour period f
 ```{r, message=FALSE}
 accel_df %>%
   ggplot(aes(x = minute, y = activity, color = day)) +
-  geom_smooth()
+  geom_smooth(se = FALSE)
 ```
 
-Based on the plot, it can be determined that the person is in overall more active during the week compared to the weekend. There are also certain times of day that the person is more active including around minutes 500 and 1250. There is a big jump on Sunday around minute 650 and a jump on Friday around minute 1250.
+Based on the plot, it can be determined that the person is overall more active during the week compared to the weekend. There are also certain times of day that the person is more active including around minutes 500 and 1250. There is a big jump on Sunday around minute 650 and a jump on Friday around minute 1250. There is minimal activity at night on all days.
 
 
 ## Problem 3
@@ -168,32 +168,43 @@ weather_df =
   ny_noaa%>% 
   mutate(date = as.character(date)) %>% 
   separate(date, c("year", "month", "day")) %>% 
-  mutate(prcp = prcp/10) %>% 
-  mutate(tmax = as.numeric(tmax), tmin = as.numeric(tmin)) %>% 
-  mutate(tmax = tmax/10) %>% 
-  mutate(tmin = tmin/10) %>% 
-  mutate(month = as.numeric(month))
+  mutate(prcp = prcp/10,
+         tmax = as.numeric(tmax), 
+         tmin = as.numeric(tmin), 
+         tmax = tmax/10,
+         tmin = tmin/10,
+         month = as.numeric(month)
+)
 
 weather_df %>% 
   count(snow) %>% 
   arrange(desc(n))
 ```
 
-Given the above code, it can be determined that the most commonly observed amounts of snowfall are 0 mm, 25 mm, 13 mm, and missing values. This may be because the data was narrowed down to the weather stations in New York State and they may only normally get 0-1 inches of snow each year. Also, the missing values could be because there are already so many missing values throughout the dataset, as noted at the beginning of problem 3.
+Given the above code, it can be determined that the most commonly observed amounts of snowfall are 0 mm and missing values. This may be because the weather stations sampled may only normally get 0 inches of snow each year and could also be because of the changing seasons during the year. Also, the missing values could be because there are already so many missing values throughout the dataset, as noted at the beginning of problem 3.
 
 
-The following code chunk creates a plot showing the average maximum temperature in January and July in each station across years.
+The following code chunk creates a plot showing the average maximum temperature in January and July in each station across years, with the month variable being converted to month name instead of number.
 
 ```{r, message=FALSE, warning=FALSE}
-weather_df %>%
-  group_by(id, year, month) %>%
+month_df =
+  tibble(
+    month = 1:12,
+    month_name = month.name
+  )
+
+weather_plot =
+  left_join(weather_df, month_df, by = "month") %>% 
+  group_by(id, year, month_name) %>%
   summarise(mean_tmax = mean(tmax)) %>% 
-  filter(month %in% c('1', '7')) %>% 
-  ggplot(aes(x = year, y = mean_tmax, fill = id)) +
+  filter(month_name %in% c("January", "July")) %>% 
+  ggplot(aes(x = year, y = mean_tmax)) +
   geom_point() +
-  facet_grid(. ~ month)
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  facet_grid(. ~ month_name)
 ```
 
+Each point in the above plot represents a weather station. Most of the points in the above plot are clustered around each other for each year. However, there are some outliers in each of the month plots. In the January plot, there is an outlier on the lower end of the average maximum temperature in 1982. In July, there is a far outlier in 1988 and some closer outliers in 1984, 2004 and 2007.
 
 
 The following code chunk creates a two-panel plot showing the maximum and minimum temperatures for the dataset and the distribution of snowfall values between, but not including, 0 and 100 mm seperately by year.
@@ -207,7 +218,7 @@ tmax_tmin_plot =
   
 snow_plot =
   weather_df %>% 
-  group_by(year, month, day) %>% 
+  group_by(year) %>% 
   filter(between(snow, 1, 99)) %>% 
   ggplot(aes(x = year, y = snow)) +
   geom_boxplot() +
